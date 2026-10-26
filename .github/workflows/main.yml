@@ -30,15 +30,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          ZIP_FILE="$(find "$GITHUB_WORKSPACE" -type f \\
-            -iname 'BAKWAS_OTT_Cloudinary_Admin_Updated.zip' \\
-            -not -path '*/.git/*' -print -quit)"
+          ZIP_FILE="$(find "$GITHUB_WORKSPACE" -type f -iname 'BAKWAS_OTT_Cloudinary_Admin_Updated.zip' -not -path '*/.git/*' -print -quit)"
 
           if [ -z "$ZIP_FILE" ]; then
             echo "::error::BAKWAS_OTT_Cloudinary_Admin_Updated.zip not found in repository."
             exit 1
           fi
 
+          echo "Found ZIP: $ZIP_FILE"
           EXTRACT_DIR="$RUNNER_TEMP/android-project"
           mkdir -p "$EXTRACT_DIR"
           unzip -oq "$ZIP_FILE" -d "$EXTRACT_DIR"
@@ -50,17 +49,16 @@ jobs:
               PROJECT_DIR="$DIR"
               break
             fi
-          done < <(find "$EXTRACT_DIR" -type f \\
-            \( -name 'settings.gradle.kts' -o -name 'settings.gradle' \) -print0)
+          done < <(find "$EXTRACT_DIR" -type f \( -name 'settings.gradle.kts' -o -name 'settings.gradle' \) -print0)
 
           if [ -z "$PROJECT_DIR" ]; then
             echo "::error::No valid Android Gradle project found inside ZIP."
-            find "$EXTRACT_DIR" -maxdepth 4 -type f
+            find "$EXTRACT_DIR" -maxdepth 5 -type f
             exit 1
           fi
 
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-          echo "Project found: $PROJECT_DIR"
+          echo "Android project found: $PROJECT_DIR"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
